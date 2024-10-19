@@ -1,0 +1,18 @@
+Using foundry
+
+1. Create project directory
+2. Initialise forge project `forge init`
+3. install dependecies i.e. `forge install openzeppelin/openzeppelin-contracts`
+4. build project `forge build`
+5. import wallet fro private key `cast wallet import deployer --interactive  `
+6. check imported wallets `cast wallet list`
+7. create an .env file containing RPC urls and explorer key
+BASE_MAINNET_RPC="https://mainnet.base.org"
+BASE_SEPOLIA_RPC="https://sepolia.base.org"
+ETHERSCAN_API_KEY="<KEY>"
+8. load .env `source .env`
+9. Deploy single contract ` forge create ./src/NFT.sol:NFT --rpc-url $BASE_SEPOLIA_RPC --account deployer`
+10. Verify contract `forge verify-contract 0x771f1BA31F042aD21b837Af1AF8525372ba2ed2F ./src/NFT.sol:NFT --chain 84532 --watch`
+11. Interact with contract (read and write)
+    (a) Read `cast call 0x5ac7DF8994Ba26ff6e7b3Af2Ddd28ab05695BAF2 --rpc-url $BASE_SEPOLIA_RPC "getBetInfo(string)" 494`
+    (b) Write `cast send <DEPLOYED_ADDRESS> --rpc-url=$BASE_SEPOLIA_RPC "mint(address)" <YOUR_ADDRESS_HERE> --account metamask`

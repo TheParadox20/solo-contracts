@@ -24,6 +24,7 @@ contract Solobet {
         Choice away;
     }
     mapping (string=>Bet) bets;
+    mapping(string => mapping(address => bool)) private hasPlacedBet;
     //modifiers
 
     modifier onlyOwner {
@@ -41,6 +42,7 @@ contract Solobet {
          * amount to stake to 
         */
         require(msg.value>0,"Stake must be greater than 0");
+        require(!hasPlacedBet[betID][msg.sender], "Address has already placed a bet on this game");
         Bet storage bet = bets[betID];
         if(choice==1){//home
             bet.home.amount+=msg.value;
@@ -58,6 +60,7 @@ contract Solobet {
             bet.away.stakers.push(payable(msg.sender));
         }
         bets[betID]=bet;
+        hasPlacedBet[betID][msg.sender] = true; 
         
     }
     function closeBet(string memory betID, uint8 winner, uint winnings, uint winnersPot) public onlyOwner{
@@ -92,6 +95,15 @@ contract Solobet {
     }
 
     // admin related funtions
+    function fund(address payable to, uint amount) public onlyOwner{
+        /**
+         * Called automatically when fiat is deposited, converts fiat to crypto
+         * @param to address to send funds to
+         */
+        require(amount>0,"Amount must be greater than 0");
+        (bool success, ) = to.call{value : amount}("");
+        require(success, "Transfer failed.");
+    }
     function changeOwner(address newOwner) onlyOwner public {
         admin = newOwner;
     }
@@ -104,5 +116,10 @@ contract Solobet {
     }
     function setCommision(uint8 newCommision) onlyOwner public {
         commision = newCommision;
+    }
+    function withdraw(uint amount) onlyOwner public {
+        require(amount>0,"Amount must be greater than 0");
+        (bool success, ) = payable(msg.sender).call{value : amount}("");
+        require(success, "Transfer failed.");
     }
 }
